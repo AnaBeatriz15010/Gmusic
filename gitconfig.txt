@@ -1,0 +1,18 @@
+git config --global user.name AnaBeatriz15010
+git config --global user.email anaevalegilmar@gmail.com
+
+-- Criar um projeto vazio
+npx create-expo-app@latest GMusic --template blank@57
+
+-- toda aula ao comecar
+cd GMusic
+npm i
+
+-- instalar bibliotecas
+npx expo install expo-audio expo-linear-gradient expo-splash-screen expo-status-bar
+npx expo install react-native-safe-area-context @react-native-comunity/slider
+npx expo install @expo/vector-icons expo-font
+npx expo install react-dom react-native-web @expo/metro-runtime
+
+-- executar 
+npx expo start --android
