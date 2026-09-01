@@ -1,5 +1,5 @@
-git config --global user.name AnaBeatriz15010
-git config --global user.email anaevalegilmar@gmail.com
+git config --global user.name angelo2709
+git config --global user.email angelogab2710@gmail.com
 
 -- Criar um projeto vazio
 npx create-expo-app@latest GMusic --template blank@57
