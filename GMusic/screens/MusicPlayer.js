@@ -15,7 +15,7 @@ import {
   View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { songs } from '../model/data';
+import songs  from '../model/data';
 import colors from '../theme/colors';
 
 const audioSources = songs.map((song) => song.url); 
@@ -95,12 +95,12 @@ export default function MusicPlayer() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <Text style={styles.eyebrow}>TOCANDO AGORA</Text>
         <Text style={styles.counter}>
           {selectedIndex + 1} de {songs.length}
         </Text>
-      </View>
+      </View> */}
 
       <FlatList 
         data={songs}
@@ -116,6 +116,19 @@ export default function MusicPlayer() {
         <Text style={styles.songTitle}>{currentSong.title}</Text>
         <Text style={styles.songArtist}>{currentSong.artist}</Text>
       </View>
+
+      <Pressable
+        disabled={!status.isLoaded}
+        onPress={handlePlayPause}
+        style={styles.playButton}
+      >
+        <Ionicons
+          name={status.playing ? 'pause' : 'play'}
+          size={38}
+          color={colors.background}
+        />
+      </Pressable>
+
     </SafeAreaView>
   )
 }
@@ -181,5 +194,13 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: colors.textSecondary,
     fontSize: 14,
+  },
+  playButton: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
   }
 })
