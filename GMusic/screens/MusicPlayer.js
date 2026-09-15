@@ -1,5 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import Slider from '@react-native-community/slider';
+import {LinearGradient} from 'expo-linear-gradient'
 import {
   setAudioModeAsync,
   useAudioPlaylist,
@@ -8,6 +10,9 @@ import {
 import {
   FlatList,
   Image,
+  Platform,
+  Pressable,
+  Share,
   Pressable,
   StyleSheet,
   Text,
@@ -15,8 +20,10 @@ import {
   View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import IconButton from '../components/IconButton';
 import songs  from '../model/data';
 import colors from '../theme/colors';
+import formatTime from '../utils/formatTime'
 
 const audioSources = songs.map((song) => song.url); 
 
@@ -46,6 +53,12 @@ export default function MusicPlayer() {
       420
     );
 
+    const duration = Number.isFinite(status.duration) ? status.duration : 0;
+    const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+    const displayPosition = isSeeking ? seekPosition : currentTime;
+    const playerUnavailable = !status.isLoaded || status.isBuffering;
+  
+
   const playlistOptions = useMemo(
     () => ({
       sources: audioSources,
@@ -60,14 +73,22 @@ export default function MusicPlayer() {
       playsInSilentMode: true,
       shouldPlayInBackground: false,
       interruptionMode: 'doNotMix',
+    }).catch(()=> {
+      setErrorMessage('nao foi possivel configurar a reproducao de audio. ');
     })
   }, []);
 
   useEffect(() => {
-    if (Number.isInteger(status.currentIndex)){
+    if (Number.isInteger(status.currentIndex) && status.currentIndex >= 0 && status.currentIndex < songs.length){
       setSelectedIndex(status.currentIndex);
     }
   }, [status.currentIndex]);
+
+  useEffect(() => {
+    listRef.current?.scrollToIndex({
+      index: selectedIndex
+    })
+  })
 
   useEffect(() => {
     playlist.loop = repeatOne ? 'single' : 'none';

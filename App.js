@@ -3,7 +3,7 @@ import {
   initialWindowMetrics,
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
-import MusicPlayer from './screens/MusicPlayer';
+import MusicPlayer from '../Gmusic/GMusic/screens/MusicPlayer';
 
 export default function App() {
   return (
