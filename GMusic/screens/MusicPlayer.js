@@ -1,63 +1,35 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Slider from '@react-native-community/slider';
-import {LinearGradient} from 'expo-linear-gradient'
+import { LinearGradient } from 'expo-linear-gradient'
 import {
   setAudioModeAsync,
   useAudioPlaylist,
   useAudioPlaylistStatus,
-} from 'expo-audio'
+ } from 'expo-audio';
 import {
   FlatList,
   Image,
   Platform,
   Pressable,
   Share,
-  Pressable,
   StyleSheet,
   Text,
   useWindowDimensions,
   View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import IconButton from '../components/IconButton';
-import songs  from '../model/data';
-import colors from '../theme/colors';
-import formatTime from '../utils/formatTime'
 
-const audioSources = songs.map((song) => song.url); 
+import IconButton from '../components/IconButton';
+import songs from '../model/data';
+import colors from '../theme/colors';
+import formatTime from '../utils/formatTime';
+
+const audioSources = songs.map((song) => song.url);
 
 export default function MusicPlayer() {
   const { height, width } = useWindowDimensions();
-  const listRef = useRef (null);
-
-  const playlist = useAudioPlaylist(playlistOptions);
-  const status = useAudioPlayerStatus(playlist);
-  
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [favoriteIds, setFavoriteIds] = useState (() => new Set());
-  const [repeatOne, setRepeatOne] = useState(false);
-  const [isSeeking, setIsSeeking] = useState(false);
-  const [seekPosition, setSeekPosition] = useState(0);
-  const [errorMessage, setErrorMessage] = useState('');
-
-
-  const currentSong = songs[selectedIndex];
-  const isFavorite = favoriteIds.has(currentSong.id);
-  const isCompact = height < 700;
-  const contetWidth = Math.min(Math.max(width - 40, 240), 460);
-  const artworkSize = Math.min(
-    contentWidth,
-    Math.max(isCompact ? 190 : 240,
-      height * (isCompact ? 0.34 : 0.4)),
-      420
-    );
-
-    const duration = Number.isFinite(status.duration) ? status.duration : 0;
-    const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
-    const displayPosition = isSeeking ? seekPosition : currentTime;
-    const playerUnavailable = !status.isLoaded || status.isBuffering;
-  
+  const listRef = useRef(null);
 
   const playlistOptions = useMemo(
     () => ({
@@ -67,56 +39,83 @@ export default function MusicPlayer() {
     })
   );
 
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(() => new Set());
+  const [repeatOne, setRepeatOne] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekPosition, setSeekPosition] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const currentSong = songs[selectedIndex];
+  const isFavorite = favoriteIds.has(currentSong.id);
+  const isCompact = height < 700;
+  const contentWidth = Math.min(Math.max(width - 40, 240), 460);
+  const artworkSize = Math.min(
+    contentWidth,
+    Math.max(isCompact ? 190: 240, height * (isCompact ? 0.34 : 0.4)),
+      420
+  );
+  const duration = Number.isFinite(status.duration) ? status.duration : 0;
+  const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+  const displayPosition = isSeeking ? seekPosition : currentTime;
+  const playerUnavailable = !status.isLoaded || status.isBuffering;
 
   useEffect(() => {
     setAudioModeAsync({
       playsInSilentMode: true,
       shouldPlayInBackground: false,
       interruptionMode: 'doNotMix',
-    }).catch(()=> {
-      setErrorMessage('nao foi possivel configurar a reproducao de audio. ');
+    }).catch(() => {
+      setErrorMessage('Não foi possível configurar a reprodução de áudio.');
     })
   }, []);
+  
+  useEffect(() => {
+    playlist.loop = repeatOne ? 'single' : 'none';
+  }, [playlist, repeatOne]);
 
   useEffect(() => {
-    if (Number.isInteger(status.currentIndex) && status.currentIndex >= 0 && status.currentIndex < songs.length){
+    if (
+      Number.isInteger(status.currentIndex) &&
+      status.currentIndex >= 0 &&
+      status.currentIndex < songs.length
+    ) {
       setSelectedIndex(status.currentIndex);
     }
   }, [status.currentIndex]);
 
   useEffect(() => {
     listRef.current?.scrollToIndex({
-      index: selectedIndex
-    })
-  })
+      index: selectedIndex,
+      animated: true,
+    });
+  }, [selectedIndex, width]);
 
-  useEffect(() => {
-    playlist.loop = repeatOne ? 'single' : 'none';
-  }, [playlist, repeatOne]);
-
-
-  function selectSong(index){
-    if(index < 0 || index >= songs.length || index === selectedIndex){
+  function selectSong(index) {
+    if (index < 0 || index >= songs.length || index === selectedIndex) {
       return;
     }
 
-    const ShouldResume =status.playing;
+    const shouldResume = status.playing;
     setSelectedIndex(index);
     playlist.skipTo(index);
 
-
-    if (ShouldResume){
+    if (shouldResume) {
       playlist.play;
     }
   }
 
   function handlePlayPause() {
-    if(status.playing){
-      playing.pause();
-    } else { 
+    if (status.playing) {
+      playlist.pause();
+    } else {
       playlist.play();
     }
   }
+
   function handleMomentumEnd(event) {
     const offset = event.nativeEvent.contentOffset.x;
     const index = Math.round(offset / width);
@@ -165,7 +164,7 @@ export default function MusicPlayer() {
         onPress={handlePlayPause}
         style={styles.playButton}
       >
-        <Ionicons
+        <Ionicons 
           name={status.playing ? 'pause' : 'play'}
           size={38}
           color={colors.background}
@@ -179,7 +178,9 @@ export default function MusicPlayer() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
     backgroundColor: colors.background,
+    paddingBottom: 28
   },
   header: {
     height: 70,

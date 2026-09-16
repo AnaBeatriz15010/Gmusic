@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo/metro-runtime": "~57.0.11",
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-community/slider": "5.2.0",
     "expo": "~57.0.14",
     "expo-audio": "~57.0.3",
     "expo-font": "~57.0.1",
