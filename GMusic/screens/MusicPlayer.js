@@ -94,33 +94,70 @@ export default function MusicPlayer() {
     });
   }, [selectedIndex, width]);
 
-  function selectSong(index) {
+  const reportPlaybackError = useCallback(() => {
+    setErrorMessage('Não foi possível executar esta ação no player.');
+  }, []);
+
+  const selectSong = useCallback((index) => {
     if (index < 0 || index >= songs.length || index === selectedIndex) {
       return;
     }
-
-    const shouldResume = status.playing;
+    try {
+      const shouldResume = status.playing;
     setSelectedIndex(index);
     playlist.skipTo(index);
 
     if (shouldResume) {
       playlist.play;
     }
-  }
+    } catch{
+      reportPlaybackError();
+    }  
+  }, [playlist, reportPlaybackError, selectedIndex, status.playing])
 
-  function handlePlayPause() {
+  const handlePlayPause = useCallback(() => {
+    try {
     if (status.playing) {
       playlist.pause();
     } else {
-      playlist.play();
+      playlist.play();}
+    } catch {
+      reportPlaybackError();
     }
-  }
+  }, [playlist, reportPlaybackError, status.playing]);
 
-  function handleMomentumEnd(event) {
+  const handleMomentumEnd = useCallback((event) => {
     const offset = event.nativeEvent.contentOffset.x;
     const index = Math.round(offset / width);
     selectSong(index);
-  }
+  }, [selectSong, width])
+
+  const handleNext = useCallback (() => {
+    const nextIndex = (selectedIndex + 1) % songs.length;
+    selectSong(nextIndex)
+  }, [selectSong, selectedIndex]);
+
+  const handlePrevious = useCallback (async() => {
+    try {
+      if (currentTime > 3) {
+        await playlist.seekTo (0);
+        return;
+      }
+      const previousIndex = (selectedIndex - 1 + songs.length) % songs.length;
+    } catch {
+      reportPlaybackError();
+    }
+  }, [currentTime, playlist, reportPlaybackError, selectSong, selectedIndex]);
+
+  const handleSeekComplete = useCallback(async(value) =>{
+    try {
+      await playlist.seekTo(value);
+    } catch {
+      reportPlaybackError();
+    } finally {
+      setIsSeeking(false);
+    }
+  }, [playlist, reportPlaybackError])  
 
   function renderArtwork({ item }) {
     return (
